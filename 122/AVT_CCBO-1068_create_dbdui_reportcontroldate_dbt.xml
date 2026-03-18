@@ -31,8 +31,21 @@
         <!-- Внешний ключ добавлен позже, после загрузки справочника форм -->
     </changeSet>
 
+    <changeSet id="126_1_BIQ-29457_create_dbdui_controldate_detail_dbt" author="Loginov">
+        <createTable tableName="dbdui_controldate_detail_dbt"
+                     remarks="Дополнительная информация для справочной таблицы DBDUI_REPORTCONTROLDATE_DBT о сроках предоставления отчётных форм">
+            <column name="t_form" type="VARCHAR(60)" remarks="Номер или строковый идентификатор отчётной формы">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="t_label" type="VARCHAR(60)" remarks="Отображаемое название отчётной формы">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
     <!-- 2. Загрузка данных для Oracle -->
-    <changeSet id="126_1_BIQ-29457_load-dbdui_reportcontroldate_dbt_oracle" author="borisov" context="prod" dbms="oracle">
+    <changeSet id="126_1_BIQ-29457_load-dbdui_reportcontroldate_dbt_oracle" author="borisov" context="prod"
+               dbms="oracle">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="dbdui_reportcontroldate_dbt_temp"/>
         </preConditions>
@@ -51,7 +64,8 @@
     </changeSet>
 
     <!-- 3. Загрузка данных для PostgreSQL -->
-    <changeSet id="126_1_BIQ-29457_load-dbdui_reportcontroldate_dbt_postgresql" author="borisov" context="prod" dbms="postgresql">
+    <changeSet id="126_1_BIQ-29457_load-dbdui_reportcontroldate_dbt_postgresql" author="borisov" context="prod"
+               dbms="postgresql">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="dbdui_reportcontroldate_dbt_temp"/>
         </preConditions>
@@ -82,8 +96,10 @@
     <!-- 5. Внешний ключ (после загрузки справочника форм) -->
     <changeSet id="126_1_BIQ-29457_add_fk_constraint" author="borisov" context="prod">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="dbdui_reportcontroldate_dbt_temp"/>
-            <tableExists tableName="dbdui_controldate_detail_dbt"/>
+            <and>
+                <tableExists tableName="dbdui_reportcontroldate_dbt_temp"/>
+                <tableExists tableName="dbdui_controldate_detail_dbt"/>
+            </and>
         </preConditions>
         <addForeignKeyConstraint
                 baseTableName="dbdui_reportcontroldate_dbt_temp"
