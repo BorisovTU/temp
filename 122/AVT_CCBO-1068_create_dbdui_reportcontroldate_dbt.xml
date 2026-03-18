@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <!-- 1. Создание таблицы -->
+    <changeSet id="126_1_BIQ-29457_create_dbdui_reportcontroldate_dbt" author="borisov" context="prod">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="dbdui_reportcontroldate_dbt_temp"/>
+            </not>
+        </preConditions>
+        <createTable tableName="dbdui_reportcontroldate_dbt_temp">
+            <column name="T_ID" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" primaryKeyName="PK_REPORTCONTROLDATE"/>
+            </column>
+            <column name="T_FORM" type="VARCHAR(50)"/>
+            <column name="T_DESC" type="VARCHAR(255)"/>
+            <column name="T_KIND" type="NUMBER(2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="T_INTERVAL" type="VARCHAR(20)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="T_SINCEDATE" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <!-- Внешний ключ добавлен позже, после загрузки справочника форм -->
+    </changeSet>
+
+    <!-- 2. Загрузка данных для Oracle -->
+    <changeSet id="126_1_BIQ-29457_load-dbdui_reportcontroldate_dbt_oracle" author="borisov" context="prod" dbms="oracle">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="dbdui_reportcontroldate_dbt_temp"/>
+        </preConditions>
+        <loadData
+                file="126_1_insert_dbdui_reportcontroldate_dbt.csv"
+                tableName="dbdui_reportcontroldate_dbt_temp"
+                separator=","
+                encoding="cp866"
+                relativeToChangelogFile="true">
+            <column name="T_FORM" type="STRING"/>
+            <column name="T_KIND" type="NUMERIC"/>
+            <column name="T_INTERVAL" type="STRING"/>
+            <column name="T_DESC" type="STRING"/>
+            <column name="T_SINCEDATE" type="DATE"/>
+        </loadData>
+    </changeSet>
+
+    <!-- 3. Загрузка данных для PostgreSQL -->
+    <changeSet id="126_1_BIQ-29457_load-dbdui_reportcontroldate_dbt_postgresql" author="borisov" context="prod" dbms="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="dbdui_reportcontroldate_dbt_temp"/>
+        </preConditions>
+        <loadData
+                file="126_1_insert_dbdui_reportcontroldate_dbt_utf8.csv"
+                tableName="dbdui_reportcontroldate_dbt_temp"
+                separator=","
+                relativeToChangelogFile="true">
+            <column name="T_FORM" type="STRING"/>
+            <column name="T_KIND" type="NUMERIC"/>
+            <column name="T_INTERVAL" type="STRING"/>
+            <column name="T_DESC" type="STRING"/>
+            <column name="T_SINCEDATE" type="DATE"/>
+        </loadData>
+    </changeSet>
+
+    <!-- 4. Уникальное ограничение -->
+    <changeSet id="126_1_BIQ-29457_add_unique_constraint" author="borisov" context="prod">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="dbdui_reportcontroldate_dbt_temp"/>
+        </preConditions>
+        <addUniqueConstraint
+                constraintName="dbdui_reportcontroldate_uq"
+                tableName="dbdui_reportcontroldate_dbt_temp"
+                columnNames="T_FORM, T_SINCEDATE"/>
+    </changeSet>
+
+    <!-- 5. Внешний ключ (после загрузки справочника форм) -->
+    <changeSet id="126_1_BIQ-29457_add_fk_constraint" author="borisov" context="prod">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="dbdui_reportcontroldate_dbt_temp"/>
+            <tableExists tableName="dbdui_controldate_detail_dbt"/>
+        </preConditions>
+        <addForeignKeyConstraint
+                baseTableName="dbdui_reportcontroldate_dbt_temp"
+                baseColumnNames="T_FORM"
+                constraintName="FK_REPORTCONTROLDATE_FORM"
+                referencedTableName="dbdui_controldate_detail_dbt"
+                referencedColumnNames="T_FORM"
+                deferrable="false"
+                initiallyDeferred="false"/>
+    </changeSet>
+
+    <!-- 6. CHECK-ограничение для Oracle (через SQL) -->
+    <changeSet id="126_1_BIQ-29457_add_check_oracle" author="borisov" context="prod" dbms="oracle">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="dbdui_reportcontroldate_dbt_temp"/>
+        </preConditions>
+        <sql>
+            ALTER TABLE dbdui_reportcontroldate_dbt
+            ADD CONSTRAINT CHK_T_INTERVAL_FORMAT
+            CHECK (REGEXP_LIKE(T_INTERVAL, '^P[1-9][0-9]*[DM]$'))
+        </sql>
+    </changeSet>
+
+    <!-- 7. CHECK-ограничение для PostgreSQL (через SQL) -->
+    <changeSet id="126_1_BIQ-29457_add_check_postgresql" author="borisov" context="prod" dbms="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="dbdui_reportcontroldate_dbt_temp"/>
+        </preConditions>
+        <sql>
+            ALTER TABLE dbdui_reportcontroldate_dbt
+            ADD CONSTRAINT CHK_T_INTERVAL_FORMAT
+            CHECK (T_INTERVAL ~ '^P[1-9][0-9]*[DM]$')
+        </sql>
+    </changeSet>
+</databaseChangeLog>

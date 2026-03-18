@@ -16,6 +16,6 @@
 
     <include file="122/release-changelog.xml" />
 	
-	<include file="dbObjectsDistr/dbobjectsdistr-changelog.xml" />
+<!--	<include file="dbObjectsDistr/dbobjectsdistr-changelog.xml" />-->
 
 </databaseChangeLog>

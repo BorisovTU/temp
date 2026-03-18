@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd
+    http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.6.xsd">
+
+    <!--  <include file="126.1/AVT_BOSS-2315_updatedb.xml"/>-->
+    <!--  <include file="126.1/AVT_BOSS-2313_updatedb.xml"/>-->
+
+    <!--  <include file="126.1/126.1_AVT_BOSS-3535_insert_regval.xml"/>-->
+
+    <!--  <include file="126.1/AVT_BOSS-2315_insert_new_notekind.xml"/>-->
+
+    <!--  <include file="126.1/AVT_BOSS-4073-alter_table_ddepolimitsjournal_dbt.xml" />-->
+    <!--	<include file="126.1/AVT_BOSS-4073-alter_table_drcv725_dbt.xml" />-->
+    <!--	<include file="126.1/AVT_BOSS-4073-alter_table_futuresholdingjournal.xml" />-->
+    <!--	<include file="126.1/AVT_BOSS-4073-alter_table_sofr_rcv2violations_dbt.xml" />-->
+
+    <!--  <changeSet id="AVT_BOSS-4073_addmenu.sql" context="prod" author="Vrubel">-->
+    <!--     <sqlFile encoding="cp866"-->
+    <!--            endDelimiter="/"-->
+    <!--        path="./126.1/AVT_BOSS-4073_addmenu.sql"-->
+    <!--        splitStatements="true"-->
+    <!--        stripComments="false"/>-->
+    <!--    </changeSet>-->
+
+    <!--  <include file="126.1/DEF-126347_update_quick_tables.xml" />-->
+
+    <!--  <changeSet id="126_1_BIQ-29457_create_dbdui_newreportcontroldate_tmp.sql" context="prod" author="Loginov" dbms="oracle">-->
+    <!--      <sqlFile encoding="cp866"-->
+    <!--               endDelimiter="/"-->
+    <!--               path="./126.1/126_1_BIQ-29457_create_dbdui_newreportcontroldate_tmp.sql"-->
+    <!--               splitStatements="true"-->
+    <!--               stripComments="false"/>-->
+    <!--  </changeSet>-->
+
+    <!--  <include file="./126.1/126_1_BIQ-29457_create_dbdui_controldate_detail_dbt.xml" />-->
+
+    <include file="./AVT_CCBO-1068_create_dbdui_reportcontroldate_dbt.xml"/>
+    <include file="./AVT_CCBO-1068_create_dbdui_reportpostinfo_dbt.xml"/>
+</databaseChangeLog>

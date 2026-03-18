@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:pro="http://www.liquibase.org/xml/ns/pro"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd
+                            http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.6.xsd ">
+
+    <changeSet id="126_1_BIQ-29457_create_dbdui_reportpostinfo_dbt" context="prod" author="borisov">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="dbdui_reportpostinfo_dbt_temp"/>
+            </not>
+        </preConditions>
+        <createTable tableName="dbdui_reportpostinfo_dbt_temp">
+            <column name="T_FORM" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="T_LIMITDATE" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="T_SENDDAY" type="DATE"/>
+            <column name="T_REGDATE" type="DATE"/>
+            <column name="T_STATUS" type="VARCHAR(255)"/>
+            <column name="T_MESSAGE" type="CLOB"/>
+            <column name="T_ADDTIME" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint
+                baseTableName="dbdui_reportpostinfo_dbt_temp"
+                baseColumnNames="T_FORM"
+                constraintName="dbdui_reportpostinfo_dbt_fk"
+                referencedTableName="dbdui_controldate_detail_dbt"
+                referencedColumnNames="T_FORM"
+                />
+
+        <addUniqueConstraint
+                constraintName="dbdui_reportpostinfo_dbt_uq"
+                tableName="dbdui_reportpostinfo_dbt_temp"
+                columnNames="T_FORM, T_LIMITDATE, T_SENDDAY, T_REGDATE, T_STATUS, T_MESSAGE"/>
+    </changeSet>
+
+</databaseChangeLog>
