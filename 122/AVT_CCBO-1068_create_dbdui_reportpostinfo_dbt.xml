@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
 
-    <changeSet id="126_1_BIQ-29457_create_dbdui_reportpostinfo_dbt" author="borisov" context="prod">
+    <changeSet id="126_1_BIQ-29457_create_dbdui_reportpostinfo_dbt" author="borisov" dbms="oracle">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="dbdui_reportpostinfo_dbt"/>
@@ -13,17 +13,17 @@
         </preConditions>
         <createTable tableName="dbdui_reportpostinfo_dbt"
                      remarks="Хранение информации о постфактумной отправке отчётности и квитанциях">
-            <column name="T_FORM" type="VARCHAR(50)" remarks="Номер или строковый идентификатор отчётной формы">
+            <column name="t_form" type="VARCHAR(50)" remarks="Номер или строковый идентификатор отчётной формы">
                 <constraints nullable="false"/>
             </column>
-            <column name="T_LIMITDATE" type="DATE" remarks="Контрольная дата отчётного периода">
+            <column name="t_limitdate" type="DATE" remarks="Контрольная дата отчётного периода">
                 <constraints nullable="false"/>
             </column>
-            <column name="T_SENDDAY" type="DATE" remarks="Дата отправки отчётности"/>
-            <column name="T_REGDATE" type="DATE" remarks="Дата регистрации отчётности в БР"/>
-            <column name="T_STATUS" type="VARCHAR(255)" remarks="Статус отправки/регистрации квитанции"/>
-            <column name="T_MESSAGE" type="CLOB" remarks="Сообщение об ошибке или предупреждении из квитанции"/>
-            <column name="T_ADDTIME" type="TIMESTAMP" defaultValueComputed="SYSTIMESTAMP"
+            <column name="t_sendday" type="DATE" remarks="Дата отправки отчётности"/>
+            <column name="t_regdate" type="DATE" remarks="Дата регистрации отчётности в БР"/>
+            <column name="t_status" type="VARCHAR(255)" remarks="Статус отправки/регистрации квитанции"/>
+            <column name="t_message" type="CLOB" remarks="Сообщение об ошибке или предупреждении из квитанции"/>
+            <column name="t_addtime" type="TIMESTAMP" defaultValueComputed="SYSTIMESTAMP"
                     remarks="Время добавления записи в систему">
                 <constraints nullable="false"/>
             </column>
@@ -31,10 +31,9 @@
 
         <addForeignKeyConstraint
                 baseTableName="dbdui_reportpostinfo_dbt"
-                baseColumnNames="T_FORM"
+                baseColumnNames="t_form"
                 constraintName="fk_reportpostinfo_form"
                 referencedTableName="dbdui_controldate_detail_dbt"
-                referencedColumnNames="T_FORM"
-                />
+                referencedColumnNames="t_form"/>
     </changeSet>
 </databaseChangeLog>

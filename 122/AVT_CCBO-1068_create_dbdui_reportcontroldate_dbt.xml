@@ -14,36 +14,44 @@
         </preConditions>
         <createTable tableName="dbdui_reportcontroldate_dbt"
                      remarks="Справочник контрольных дат для отчётных форм">
-            <column name="T_ID" type="BIGINT" autoIncrement="true"
+            <column name="t_id" type="BIGINT" autoIncrement="true"
                     remarks="Идентификатор записи в справочнике">
                 <constraints primaryKey="true" primaryKeyName="pk_reportcontroldate"/>
             </column>
-            <column name="T_FORM" type="VARCHAR(50)"
+            <column name="t_form" type="VARCHAR(50)"
                     remarks="Номер или строковый идентификатор отчётной формы"/>
-            <column name="T_DESC" type="VARCHAR(255)"
+            <column name="t_desc" type="VARCHAR(255)"
                     remarks="Описание периода предоставления отчётности"/>
-            <column name="T_KIND" type="NUMBER(2)"
+            <column name="t_kind" type="NUMBER(2)"
                     remarks="Вид контрольной даты: 1 - рабочий день, 2 - календарный день">
                 <constraints nullable="false"/>
             </column>
-            <column name="T_INTERVAL" type="VARCHAR(20)"
+            <column name="t_interval" type="VARCHAR(20)"
                     remarks="Интервал предоставления отчётности в формате ISO 8601 (PnD, PnM)">
                 <constraints nullable="false"/>
             </column>
-            <column name="T_SINCEDATE" type="DATE"
+            <column name="t_sincedate" type="DATE"
                     remarks="Дата начала действия записи справочника">
                 <constraints nullable="false"/>
             </column>
         </createTable>
     </changeSet>
 
+    <!-- 2. Создание таблицы справочника форм -->
     <changeSet id="126_1_BIQ-29457_create_dbdui_controldate_detail_dbt" author="Loginov">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="dbdui_controldate_detail_dbt"/>
+            </not>
+        </preConditions>
         <createTable tableName="dbdui_controldate_detail_dbt"
-                     remarks="Дополнительная информация для справочной таблицы DBDUI_REPORTCONTROLDATE_DBT о сроках предоставления отчётных форм">
-            <column name="t_form" type="VARCHAR(60)" remarks="Номер или строковый идентификатор отчётной формы">
+                     remarks="Дополнительная информация для справочной таблицы о сроках предоставления отчётных форм">
+            <column name="t_form" type="VARCHAR(60)"
+                    remarks="Номер или строковый идентификатор отчётной формы">
                 <constraints nullable="false" primaryKey="true"/>
             </column>
-            <column name="t_label" type="VARCHAR(60)" remarks="Отображаемое название отчётной формы">
+            <column name="t_label" type="VARCHAR(60)"
+                    remarks="Отображаемое название отчётной формы">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -60,11 +68,11 @@
                 separator=","
                 encoding="cp866"
                 relativeToChangelogFile="true">
-            <column name="T_FORM" type="STRING"/>
-            <column name="T_KIND" type="NUMERIC"/>
-            <column name="T_INTERVAL" type="STRING"/>
-            <column name="T_DESC" type="STRING"/>
-            <column name="T_SINCEDATE" type="DATE"/>
+            <column name="t_form" type="STRING"/>
+            <column name="t_kind" type="NUMBER(2)"/>
+            <column name="t_interval" type="STRING"/>
+            <column name="t_desc" type="STRING"/>
+            <column name="t_sincedate" type="DATE"/>
         </loadData>
     </changeSet>
 
@@ -78,11 +86,11 @@
                 tableName="dbdui_reportcontroldate_dbt"
                 separator=","
                 relativeToChangelogFile="true">
-            <column name="T_FORM" type="STRING"/>
-            <column name="T_KIND" type="NUMERIC"/>
-            <column name="T_INTERVAL" type="STRING"/>
-            <column name="T_DESC" type="STRING"/>
-            <column name="T_SINCEDATE" type="DATE"/>
+            <column name="t_form" type="STRING"/>
+            <column name="t_kind" type="NUMBER(2)"/>
+            <column name="t_interval" type="STRING"/>
+            <column name="t_desc" type="STRING"/>
+            <column name="t_sincedate" type="DATE"/>
         </loadData>
     </changeSet>
 
@@ -94,7 +102,7 @@
         <addUniqueConstraint
                 constraintName="uk_reportcontroldate_form_since"
                 tableName="dbdui_reportcontroldate_dbt"
-                columnNames="T_FORM, T_SINCEDATE"/>
+                columnNames="t_form, t_sincedate"/>
     </changeSet>
 
     <!-- 6. Внешний ключ -->
@@ -107,14 +115,15 @@
         </preConditions>
         <addForeignKeyConstraint
                 baseTableName="dbdui_reportcontroldate_dbt"
-                baseColumnNames="T_FORM"
+                baseColumnNames="t_form"
                 constraintName="dbdui_reportcontroldate_dbt_fk"
                 referencedTableName="dbdui_controldate_detail_dbt"
-                referencedColumnNames="T_FORM"
+                referencedColumnNames="t_form"
                 deferrable="false"
                 initiallyDeferred="false"/>
     </changeSet>
 
+    <!-- 7. CHECK-ограничение для Oracle -->
     <changeSet id="126_1_BIQ-29457_add_check_oracle" author="borisov" context="prod" dbms="oracle">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="dbdui_reportcontroldate_dbt"/>
@@ -122,10 +131,11 @@
         <sql>
             ALTER TABLE dbdui_reportcontroldate_dbt
             ADD CONSTRAINT dbdui_reportcontroldate_dbt_interval_chk
-            CHECK (REGEXP_LIKE(T_INTERVAL, '^P[1-9][0-9]*[DM]$'))
+            CHECK (REGEXP_LIKE(t_interval, '^P[1-9][0-9]*[DM]$'))
         </sql>
     </changeSet>
 
+    <!-- 8. CHECK-ограничение для PostgreSQL -->
     <changeSet id="126_1_BIQ-29457_add_check_postgresql" author="borisov" context="prod" dbms="postgresql">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="dbdui_reportcontroldate_dbt"/>
@@ -133,7 +143,7 @@
         <sql>
             ALTER TABLE dbdui_reportcontroldate_dbt
             ADD CONSTRAINT dbdui_reportcontroldate_dbt_interval_chk
-            CHECK (T_INTERVAL ~ '^P[1-9][0-9]*[DM]$')
+            CHECK (t_interval ~ '^P[1-9][0-9]*[DM]$')
         </sql>
     </changeSet>
 </databaseChangeLog>
