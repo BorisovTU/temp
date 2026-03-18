@@ -1,29 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xmlns:pro="http://www.liquibase.org/xml/ns/pro"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd
-                            http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.6.xsd ">
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
 
-    <changeSet id="126_1_BIQ-29457_create_dbdui_reportpostinfo_dbt" context="prod" author="borisov">
+    <changeSet id="126_1_BIQ-29457_create_dbdui_reportpostinfo_dbt" author="borisov" context="prod">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="dbdui_reportpostinfo_dbt"/>
             </not>
         </preConditions>
-        <createTable tableName="dbdui_reportpostinfo_dbt">
-            <column name="T_FORM" type="VARCHAR(50)">
+        <createTable tableName="dbdui_reportpostinfo_dbt"
+                     remarks="Хранение информации о постфактумной отправке отчётности и квитанциях">
+            <column name="T_FORM" type="VARCHAR(50)" remarks="Номер или строковый идентификатор отчётной формы">
                 <constraints nullable="false"/>
             </column>
-            <column name="T_LIMITDATE" type="DATE">
+            <column name="T_LIMITDATE" type="DATE" remarks="Контрольная дата отчётного периода">
                 <constraints nullable="false"/>
             </column>
-            <column name="T_SENDDAY" type="DATE"/>
-            <column name="T_REGDATE" type="DATE"/>
-            <column name="T_STATUS" type="VARCHAR(255)"/>
-            <column name="T_MESSAGE" type="CLOB"/>
-            <column name="T_ADDTIME" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+            <column name="T_SENDDAY" type="DATE" remarks="Дата отправки отчётности"/>
+            <column name="T_REGDATE" type="DATE" remarks="Дата регистрации отчётности в БР"/>
+            <column name="T_STATUS" type="VARCHAR(255)" remarks="Статус отправки/регистрации квитанции"/>
+            <column name="T_MESSAGE" type="CLOB" remarks="Сообщение об ошибке или предупреждении из квитанции"/>
+            <column name="T_ADDTIME" type="TIMESTAMP" defaultValueComputed="SYSTIMESTAMP"
+                    remarks="Время добавления записи в систему">
                 <constraints nullable="false"/>
             </column>
         </createTable>
@@ -31,10 +32,9 @@
         <addForeignKeyConstraint
                 baseTableName="dbdui_reportpostinfo_dbt"
                 baseColumnNames="T_FORM"
-                constraintName="dbdui_reportpostinfo_dbt_fk"
+                constraintName="fk_reportpostinfo_form"
                 referencedTableName="dbdui_controldate_detail_dbt"
                 referencedColumnNames="T_FORM"
                 />
     </changeSet>
-
 </databaseChangeLog>

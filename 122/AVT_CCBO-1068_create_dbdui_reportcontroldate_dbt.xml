@@ -5,30 +5,36 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
 
-    <!-- 1. Создание таблицы -->
+    <!-- 1. Создание таблицы справочника контрольных дат -->
     <changeSet id="126_1_BIQ-29457_create_dbdui_reportcontroldate_dbt" author="borisov" context="prod">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="dbdui_reportcontroldate_dbt"/>
             </not>
         </preConditions>
-        <createTable tableName="dbdui_reportcontroldate_dbt">
-            <column name="T_ID" type="BIGINT" autoIncrement="true">
-                <constraints primaryKey="true" primaryKeyName="PK_REPORTCONTROLDATE"/>
+        <createTable tableName="dbdui_reportcontroldate_dbt"
+                     remarks="Справочник контрольных дат для отчётных форм">
+            <column name="T_ID" type="BIGINT" autoIncrement="true"
+                    remarks="Идентификатор записи в справочнике">
+                <constraints primaryKey="true" primaryKeyName="pk_reportcontroldate"/>
             </column>
-            <column name="T_FORM" type="VARCHAR(50)"/>
-            <column name="T_DESC" type="VARCHAR(255)"/>
-            <column name="T_KIND" type="NUMBER(2)">
+            <column name="T_FORM" type="VARCHAR(50)"
+                    remarks="Номер или строковый идентификатор отчётной формы"/>
+            <column name="T_DESC" type="VARCHAR(255)"
+                    remarks="Описание периода предоставления отчётности"/>
+            <column name="T_KIND" type="NUMBER(2)"
+                    remarks="Вид контрольной даты: 1 - рабочий день, 2 - календарный день">
                 <constraints nullable="false"/>
             </column>
-            <column name="T_INTERVAL" type="VARCHAR(20)">
+            <column name="T_INTERVAL" type="VARCHAR(20)"
+                    remarks="Интервал предоставления отчётности в формате ISO 8601 (PnD, PnM)">
                 <constraints nullable="false"/>
             </column>
-            <column name="T_SINCEDATE" type="DATE">
+            <column name="T_SINCEDATE" type="DATE"
+                    remarks="Дата начала действия записи справочника">
                 <constraints nullable="false"/>
             </column>
         </createTable>
-        <!-- Внешний ключ добавлен позже, после загрузки справочника форм -->
     </changeSet>
 
     <changeSet id="126_1_BIQ-29457_create_dbdui_controldate_detail_dbt" author="Loginov">
@@ -43,9 +49,8 @@
         </createTable>
     </changeSet>
 
-    <!-- 2. Загрузка данных для Oracle -->
-    <changeSet id="126_1_BIQ-29457_load-dbdui_reportcontroldate_dbt_oracle" author="borisov" context="prod"
-               dbms="oracle">
+    <!-- 3. Загрузка данных для Oracle -->
+    <changeSet id="126_1_BIQ-29457_load-dbdui_reportcontroldate_dbt_oracle" author="borisov" context="prod" dbms="oracle">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="dbdui_reportcontroldate_dbt"/>
         </preConditions>
@@ -63,9 +68,8 @@
         </loadData>
     </changeSet>
 
-    <!-- 3. Загрузка данных для PostgreSQL -->
-    <changeSet id="126_1_BIQ-29457_load-dbdui_reportcontroldate_dbt_postgresql" author="borisov" context="prod"
-               dbms="postgresql">
+    <!-- 4. Загрузка данных для PostgreSQL -->
+    <changeSet id="126_1_BIQ-29457_load-dbdui_reportcontroldate_dbt_postgresql" author="borisov" context="prod" dbms="postgresql">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="dbdui_reportcontroldate_dbt"/>
         </preConditions>
@@ -82,18 +86,18 @@
         </loadData>
     </changeSet>
 
-    <!-- 4. Уникальное ограничение -->
+    <!-- 5. Уникальное ограничение -->
     <changeSet id="126_1_BIQ-29457_add_unique_constraint" author="borisov" context="prod">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="dbdui_reportcontroldate_dbt"/>
         </preConditions>
         <addUniqueConstraint
-                constraintName="dbdui_reportcontroldate_uq"
+                constraintName="uk_reportcontroldate_form_since"
                 tableName="dbdui_reportcontroldate_dbt"
                 columnNames="T_FORM, T_SINCEDATE"/>
     </changeSet>
 
-    <!-- 5. Внешний ключ (после загрузки справочника форм) -->
+    <!-- 6. Внешний ключ -->
     <changeSet id="126_1_BIQ-29457_add_fk_constraint" author="borisov" context="prod">
         <preConditions onFail="MARK_RAN">
             <and>
@@ -104,33 +108,31 @@
         <addForeignKeyConstraint
                 baseTableName="dbdui_reportcontroldate_dbt"
                 baseColumnNames="T_FORM"
-                constraintName="FK_REPORTCONTROLDATE_FORM"
+                constraintName="dbdui_reportcontroldate_dbt_fk"
                 referencedTableName="dbdui_controldate_detail_dbt"
                 referencedColumnNames="T_FORM"
                 deferrable="false"
                 initiallyDeferred="false"/>
     </changeSet>
 
-    <!-- 6. CHECK-ограничение для Oracle (через SQL) -->
     <changeSet id="126_1_BIQ-29457_add_check_oracle" author="borisov" context="prod" dbms="oracle">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="dbdui_reportcontroldate_dbt"/>
         </preConditions>
         <sql>
             ALTER TABLE dbdui_reportcontroldate_dbt
-            ADD CONSTRAINT CHK_T_INTERVAL_FORMAT
+            ADD CONSTRAINT dbdui_reportcontroldate_dbt_interval_chk
             CHECK (REGEXP_LIKE(T_INTERVAL, '^P[1-9][0-9]*[DM]$'))
         </sql>
     </changeSet>
 
-    <!-- 7. CHECK-ограничение для PostgreSQL (через SQL) -->
     <changeSet id="126_1_BIQ-29457_add_check_postgresql" author="borisov" context="prod" dbms="postgresql">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="dbdui_reportcontroldate_dbt"/>
         </preConditions>
         <sql>
             ALTER TABLE dbdui_reportcontroldate_dbt
-            ADD CONSTRAINT CHK_T_INTERVAL_FORMAT
+            ADD CONSTRAINT dbdui_reportcontroldate_dbt_interval_chk
             CHECK (T_INTERVAL ~ '^P[1-9][0-9]*[DM]$')
         </sql>
     </changeSet>
