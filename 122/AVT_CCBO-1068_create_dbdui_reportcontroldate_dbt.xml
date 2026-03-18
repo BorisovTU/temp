@@ -9,10 +9,10 @@
     <changeSet id="126_1_BIQ-29457_create_dbdui_reportcontroldate_dbt" author="borisov" context="prod">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="dbdui_reportcontroldate_dbt_temp"/>
+                <tableExists tableName="dbdui_reportcontroldate_dbt"/>
             </not>
         </preConditions>
-        <createTable tableName="dbdui_reportcontroldate_dbt_temp">
+        <createTable tableName="dbdui_reportcontroldate_dbt">
             <column name="T_ID" type="BIGINT" autoIncrement="true">
                 <constraints primaryKey="true" primaryKeyName="PK_REPORTCONTROLDATE"/>
             </column>
@@ -47,11 +47,11 @@
     <changeSet id="126_1_BIQ-29457_load-dbdui_reportcontroldate_dbt_oracle" author="borisov" context="prod"
                dbms="oracle">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="dbdui_reportcontroldate_dbt_temp"/>
+            <tableExists tableName="dbdui_reportcontroldate_dbt"/>
         </preConditions>
         <loadData
                 file="126_1_insert_dbdui_reportcontroldate_dbt.csv"
-                tableName="dbdui_reportcontroldate_dbt_temp"
+                tableName="dbdui_reportcontroldate_dbt"
                 separator=","
                 encoding="cp866"
                 relativeToChangelogFile="true">
@@ -67,11 +67,11 @@
     <changeSet id="126_1_BIQ-29457_load-dbdui_reportcontroldate_dbt_postgresql" author="borisov" context="prod"
                dbms="postgresql">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="dbdui_reportcontroldate_dbt_temp"/>
+            <tableExists tableName="dbdui_reportcontroldate_dbt"/>
         </preConditions>
         <loadData
-                file="126_1_insert_dbdui_reportcontroldate_dbt_utf8.csv"
-                tableName="dbdui_reportcontroldate_dbt_temp"
+                file="126_1_insert_dbdui_reportcontroldate_dbt.csv"
+                tableName="dbdui_reportcontroldate_dbt"
                 separator=","
                 relativeToChangelogFile="true">
             <column name="T_FORM" type="STRING"/>
@@ -85,11 +85,11 @@
     <!-- 4. Уникальное ограничение -->
     <changeSet id="126_1_BIQ-29457_add_unique_constraint" author="borisov" context="prod">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="dbdui_reportcontroldate_dbt_temp"/>
+            <tableExists tableName="dbdui_reportcontroldate_dbt"/>
         </preConditions>
         <addUniqueConstraint
                 constraintName="dbdui_reportcontroldate_uq"
-                tableName="dbdui_reportcontroldate_dbt_temp"
+                tableName="dbdui_reportcontroldate_dbt"
                 columnNames="T_FORM, T_SINCEDATE"/>
     </changeSet>
 
@@ -97,12 +97,12 @@
     <changeSet id="126_1_BIQ-29457_add_fk_constraint" author="borisov" context="prod">
         <preConditions onFail="MARK_RAN">
             <and>
-                <tableExists tableName="dbdui_reportcontroldate_dbt_temp"/>
+                <tableExists tableName="dbdui_reportcontroldate_dbt"/>
                 <tableExists tableName="dbdui_controldate_detail_dbt"/>
             </and>
         </preConditions>
         <addForeignKeyConstraint
-                baseTableName="dbdui_reportcontroldate_dbt_temp"
+                baseTableName="dbdui_reportcontroldate_dbt"
                 baseColumnNames="T_FORM"
                 constraintName="FK_REPORTCONTROLDATE_FORM"
                 referencedTableName="dbdui_controldate_detail_dbt"
@@ -114,7 +114,7 @@
     <!-- 6. CHECK-ограничение для Oracle (через SQL) -->
     <changeSet id="126_1_BIQ-29457_add_check_oracle" author="borisov" context="prod" dbms="oracle">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="dbdui_reportcontroldate_dbt_temp"/>
+            <tableExists tableName="dbdui_reportcontroldate_dbt"/>
         </preConditions>
         <sql>
             ALTER TABLE dbdui_reportcontroldate_dbt
@@ -126,7 +126,7 @@
     <!-- 7. CHECK-ограничение для PostgreSQL (через SQL) -->
     <changeSet id="126_1_BIQ-29457_add_check_postgresql" author="borisov" context="prod" dbms="postgresql">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="dbdui_reportcontroldate_dbt_temp"/>
+            <tableExists tableName="dbdui_reportcontroldate_dbt"/>
         </preConditions>
         <sql>
             ALTER TABLE dbdui_reportcontroldate_dbt

@@ -38,6 +38,6 @@
 
     <!--  <include file="./126.1/126_1_BIQ-29457_create_dbdui_controldate_detail_dbt.xml" />-->
 
-    <include file="./AVT_CCBO-1068_create_dbdui_reportcontroldate_dbt.xml"/>
-    <include file="./AVT_CCBO-1068_create_dbdui_reportpostinfo_dbt.xml"/>
+    <include file="122/AVT_CCBO-1068_create_dbdui_reportcontroldate_dbt.xml"/>
+    <include file="122/AVT_CCBO-1068_create_dbdui_reportpostinfo_dbt.xml"/>
 </databaseChangeLog>

@@ -9,10 +9,10 @@
     <changeSet id="126_1_BIQ-29457_create_dbdui_reportpostinfo_dbt" context="prod" author="borisov">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName="dbdui_reportpostinfo_dbt_temp"/>
+                <tableExists tableName="dbdui_reportpostinfo_dbt"/>
             </not>
         </preConditions>
-        <createTable tableName="dbdui_reportpostinfo_dbt_temp">
+        <createTable tableName="dbdui_reportpostinfo_dbt">
             <column name="T_FORM" type="VARCHAR(50)">
                 <constraints nullable="false"/>
             </column>
@@ -29,17 +29,12 @@
         </createTable>
 
         <addForeignKeyConstraint
-                baseTableName="dbdui_reportpostinfo_dbt_temp"
+                baseTableName="dbdui_reportpostinfo_dbt"
                 baseColumnNames="T_FORM"
                 constraintName="dbdui_reportpostinfo_dbt_fk"
                 referencedTableName="dbdui_controldate_detail_dbt"
                 referencedColumnNames="T_FORM"
                 />
-
-        <addUniqueConstraint
-                constraintName="dbdui_reportpostinfo_dbt_uq"
-                tableName="dbdui_reportpostinfo_dbt_temp"
-                columnNames="T_FORM, T_LIMITDATE, T_SENDDAY, T_REGDATE, T_STATUS, T_MESSAGE"/>
     </changeSet>
 
 </databaseChangeLog>
