@@ -1,0 +1,6 @@
+ 
+[2025-12-08 09:50:22] INFO [liquibase.lockservice] Successfully acquired change log lock
+[2025-12-08 09:50:23] INFO [liquibase.changelog] Reading from RSHB_SOFR_DEBUG.DATABASECHANGELOG
+[2025-12-08 09:50:25] INFO [liquibase.changelog] SQL in file ./dbObjectsDistr/it_checklimitreport.pkb executed
+[2025-12-08 09:50:25] INFO [liquibase.changelog] ChangeSet dbObjectsDistr/dbobjectsdistr-changelog.xml::it_checklimitreport.pkb::Loginov ran successfully in 410ms
+[2025-12-08 09:50:25] INFO [liquibase.lockservice] Successfully released change log lock

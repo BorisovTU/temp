@@ -1,0 +1,10 @@
+ 
+[2025-11-27 14:43:09] INFO [liquibase.database] Set default schema name to rshb_sofr
+[2025-11-27 14:43:10] INFO [liquibase.lockservice] Successfully acquired change log lock
+[2025-11-27 14:43:12] INFO [liquibase.changelog] Reading resource: postgres/InsertData/it_checklimitreport_data.sql
+[2025-11-27 14:43:12] INFO [liquibase.changelog] Reading from rshb_sofr.databasechangelog
+[2025-11-27 14:43:13] INFO [liquibase.changelog] SQL in file function.sql executed
+[2025-11-27 14:43:13] INFO [liquibase.changelog] ChangeSet postgres/dbObjects/it_checklimitreport/release-changelog.xml::it_checklimitreport_function::Loginov ran successfully in 932ms
+[2025-11-27 14:43:13] INFO [liquibase.changelog] Custom SQL executed
+[2025-11-27 14:43:13] INFO [liquibase.changelog] ChangeSet postgres/InsertData/it_checklimitreport_data.sql::distrib::author ran successfully in 37ms
+[2025-11-27 14:43:13] INFO [liquibase.lockservice] Successfully released change log lock
