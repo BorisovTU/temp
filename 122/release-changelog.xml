@@ -38,6 +38,17 @@
 
     <!--  <include file="./126.1/126_1_BIQ-29457_create_dbdui_controldate_detail_dbt.xml" />-->
 
+
+    <changeSet id="126_1_BIQ-29457_fill_dbdui_controldate_detail_dbt" author="Loginov" dbms="postgres" runOnChange="true">
+        <loadUpdateData primaryKey="t_form"
+                        tableName="dbdui_controldate_detail_dbt"
+                        file="dbdui_controldate_detail_dbt.csv"
+                        separator=";">
+            <column name="t_form" type="STRING"/>
+            <column name="t_label" type="STRING"/>
+        </loadUpdateData>
+    </changeSet>
+
     <include file="122/AVT_CCBO-1068_create_dbdui_reportcontroldate_dbt.xml"/>
     <include file="122/AVT_CCBO-1068_create_dbdui_reportpostinfo_dbt.xml"/>
 </databaseChangeLog>
