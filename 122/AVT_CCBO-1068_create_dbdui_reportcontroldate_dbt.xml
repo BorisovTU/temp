@@ -60,10 +60,10 @@
     <!-- 3. Загрузка данных для Oracle -->
     <changeSet id="126_1_BIQ-29457_load-dbdui_reportcontroldate_dbt_oracle" author="borisov" context="prod" dbms="oracle">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="dbdui_reportcontroldate_dbt_cp866"/>
+            <tableExists tableName="dbdui_reportcontroldate_dbt"/>
         </preConditions>
         <loadData
-                file="126_1_insert_dbdui_reportcontroldate_dbt.csv"
+                file="126_1_insert_dbdui_reportcontroldate_dbt_cp866.csv"
                 tableName="dbdui_reportcontroldate_dbt"
                 separator=","
                 encoding="cp866"
