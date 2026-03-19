@@ -60,7 +60,7 @@
     <!-- 3. Загрузка данных для Oracle -->
     <changeSet id="126_1_BIQ-29457_load-dbdui_reportcontroldate_dbt_oracle" author="borisov" context="prod" dbms="oracle">
         <preConditions onFail="MARK_RAN">
-            <tableExists tableName="dbdui_reportcontroldate_dbt"/>
+            <tableExists tableName="dbdui_reportcontroldate_dbt_cp866"/>
         </preConditions>
         <loadData
                 file="126_1_insert_dbdui_reportcontroldate_dbt.csv"
