@@ -5,7 +5,6 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
 
-    <!-- 1. Создание таблицы справочника контрольных дат -->
     <changeSet id="126_1_BIQ-29457_create_dbdui_reportcontroldate_dbt" author="borisov" context="prod">
         <preConditions onFail="MARK_RAN">
             <not>
@@ -37,46 +36,6 @@
         </createTable>
     </changeSet>
 
-    <!-- 2. Создание таблицы справочника форм -->
-    <changeSet id="126_1_BIQ-29457_create_dbdui_controldate_detail_dbt" author="Loginov">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="dbdui_controldate_detail_dbt"/>
-            </not>
-        </preConditions>
-        <createTable tableName="dbdui_controldate_detail_dbt"
-                     remarks="Дополнительная информация для справочной таблицы о сроках предоставления отчётных форм">
-            <column name="t_form" type="VARCHAR(60)"
-                    remarks="Номер или строковый идентификатор отчётной формы">
-                <constraints nullable="false" primaryKey="true"/>
-            </column>
-            <column name="t_label" type="VARCHAR(60)"
-                    remarks="Отображаемое название отчётной формы">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
-    </changeSet>
-
-    <!-- 3. Загрузка данных для Oracle -->
-<!--    <changeSet id="126_1_BIQ-29457_load-dbdui_reportcontroldate_dbt_oracle" author="borisov" context="prod" dbms="oracle">-->
-<!--        <preConditions onFail="MARK_RAN">-->
-<!--            <tableExists tableName="dbdui_reportcontroldate_dbt"/>-->
-<!--        </preConditions>-->
-<!--        <loadData-->
-<!--                file="126_1_insert_dbdui_reportcontroldate_dbt_cp866.csv"-->
-<!--                tableName="dbdui_reportcontroldate_dbt"-->
-<!--                separator=","-->
-<!--                encoding="cp866"-->
-<!--                relativeToChangelogFile="true">-->
-<!--            <column name="t_form" type="STRING"/>-->
-<!--            <column name="t_kind" type="NUMBER(2)"/>-->
-<!--            <column name="t_interval" type="STRING"/>-->
-<!--            <column name="t_desc" type="STRING"/>-->
-<!--            <column name="t_sincedate" type="DATE"/>-->
-<!--        </loadData>-->
-<!--    </changeSet>-->
-
-    <!-- 4. Загрузка данных для PostgreSQL -->
     <changeSet id="126_1_BIQ-29457_load-dbdui_reportcontroldate_dbt" author="borisov" context="prod">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="dbdui_reportcontroldate_dbt"/>
@@ -95,7 +54,6 @@
         </loadData>
     </changeSet>
 
-    <!-- 5. Уникальное ограничение -->
     <changeSet id="126_1_BIQ-29457_add_unique_constraint" author="borisov" context="prod">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="dbdui_reportcontroldate_dbt"/>
@@ -106,7 +64,6 @@
                 columnNames="t_form, t_sincedate"/>
     </changeSet>
 
-    <!-- 6. Внешний ключ -->
     <changeSet id="126_1_BIQ-29457_add_fk_constraint" author="borisov" context="prod">
         <preConditions onFail="MARK_RAN">
             <and>
@@ -119,12 +76,9 @@
                 baseColumnNames="t_form"
                 constraintName="dbdui_reportcontroldate_dbt_fk"
                 referencedTableName="dbdui_controldate_detail_dbt"
-                referencedColumnNames="t_form"
-                deferrable="false"
-                initiallyDeferred="false"/>
+                referencedColumnNames="t_form" />
     </changeSet>
 
-    <!-- 7. CHECK-ограничение для Oracle -->
     <changeSet id="126_1_BIQ-29457_add_check_oracle" author="borisov" context="prod" dbms="oracle">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="dbdui_reportcontroldate_dbt"/>
@@ -136,7 +90,6 @@
         </sql>
     </changeSet>
 
-    <!-- 8. CHECK-ограничение для PostgreSQL -->
     <changeSet id="126_1_BIQ-29457_add_check_postgresql" author="borisov" context="prod" dbms="postgresql">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="dbdui_reportcontroldate_dbt"/>

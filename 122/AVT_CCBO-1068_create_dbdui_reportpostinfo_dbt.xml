@@ -5,7 +5,7 @@
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                       http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
 
-    <changeSet id="126_1_BIQ-29457_create_dbdui_reportpostinfo_dbt" author="borisov" dbms="oracle">
+    <changeSet id="126_1_BIQ-29457_create_dbdui_reportpostinfo_dbt" author="borisov">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="dbdui_reportpostinfo_dbt"/>
