@@ -1,0 +1,374 @@
+Даниил Капустин
+Даниил Капустин @kapustin-dk started a thread on the diff 13 minutes ago
+sql/126.1/AVT_CCBO-1068_create_dbdui_reportcontroldate_dbt.xml
+0 → 100644
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet id="126_1_BIQ-29457_create_dbdui_reportcontroldate_dbt" author="borisov" context="prod">
+
+    Даниил Капустин
+    Даниил Капустин
+    @kapustin-dk · 13 minutes ago
+    Developer
+
+Т.к. мы метим в 126.2 - придется поменять названия и перетащить в новую папку.
+
+Но это пока не актуально, я ещё не обновил ветку. Если я это сделаю после того как пройдет МР - сам перенесу.
+
+Даниил Капустин
+Даниил Капустин @kapustin-dk started a thread on the diff 13 minutes ago
+sql/dbObjectsDistr/it_checklimitreport.pkb
+        RETURN v_result;
+    EXCEPTION
+        WHEN OTHERS THEN
+            it_log.log(v_log_prefix || ' ERROR: ' || SQLERRM, it_log.C_MSG_TYPE__ERROR);
+            RETURN p_json_input;
+    END EnrichReportJson;
+
+    -- =============================================================================
+    -- UI
+    -- =============================================================================
+    FUNCTION ControlDateMetaUI
+        RETURN CLOB
+        IS
+        C_ROLES                 VARCHAR2(256) := '["dkk_staff"]';
+        C_REPORT_LOCALIZED_NAME VARCHAR2(64)  := '஫  ᮬ  ப ।⠢ ⭮  ';
+        C_SYS_TAGS              VARCHAR2(256) := '["ORACLE_DEBUG", "BR"]';
+
+    Даниил Капустин
+    Даниил Капустин
+    @kapustin-dk · 13 minutes ago
+    Developer
+
+Лучше сразу менять на oracle, а то забудешь и оно так в прод уедет
+
+Даниил Капустин
+Даниил Капустин @kapustin-dk started a thread on the diff 13 minutes ago
+sql/dbObjectsDistr/it_checklimitreport.pkb
+                               JSON_ARRAY(
+                                       JSON_OBJECT(
+                                               'label' VALUE ' ',
+                                               'name' VALUE 'endDate',
+                                               'type' VALUE 'date',
+                                               'required' VALUE 'true' FORMAT JSON,
+                                               'column' VALUE 0,
+                                               'default' VALUE TO_CHAR(SYSDATE, 'YYYY-MM-DD')
+                                       ),
+                                       JSON_OBJECT(
+                                               'label' VALUE '᮪ ⮢',
+                                               'name' VALUE 'reportName',
+                                               'type' VALUE 'select',
+                                               'required' VALUE 'true' FORMAT JSON,
+                                               'column' VALUE 1,
+                                               'default' VALUE (SELECT JSON_ARRAYAGG(T_FORM RETURNING VARCHAR2(32767))
+
+    Даниил Капустин
+    Даниил Капустин
+    @kapustin-dk · 13 minutes ago
+    Developer
+
+У нас по идее T_FORM с фиксированной длинной в бд, можно и меньше написать. Но в целом после 2к оракл делает по размеру данных, так что не критично.
+
+А так мы обычно тут возвращаем клобы, чтоб точно не сломалось
+
+Даниил Капустин
+Даниил Капустин @kapustin-dk started a thread on the diff 13 minutes ago
+sql/dbObjectsDistr/it_checklimitreport.pkb
+        v_date_begin                    DATE;
+        v_date_end                      DATE;
+        v_report_name_list              JSON_ARRAY_T;
+        v_final_json                    JSON_ARRAY_T  := JSON_ARRAY_T();
+        v_single_form_json              CLOB;
+        v_json_output                   CLOB;
+        v_errors_array                  JSON_ARRAY_T  := JSON_ARRAY_T();
+        v_has_any_param                 BOOLEAN       := FALSE;
+        v_json_clob                     CLOB          := C_EMPTY_JSON_ARRAY;
+    BEGIN
+        IF p_json_input IS NULL OR p_json_input = '{}' OR p_json_input = '[]' THEN
+            RETURN BuildJsonOutput(p_body => ControlDateMetaUI());
+        END IF;
+        v_json_obj := JSON_OBJECT_T.parse(p_json_input);
+        v_date_begin := TO_DATE(v_json_obj.get_string(C_IN_BEGIN_DATE_TAG), C_IN_DATE_FORMAT);
+        v_has_any_param := TRUE;
+
+    Даниил Капустин
+    Даниил Капустин
+    @kapustin-dk · 13 minutes ago
+    Developer
+
+Далее эта переменная не используется. Может удалить её вообще ?
+
+Даниил Капустин
+Даниил Капустин @kapustin-dk started a thread on the diff 13 minutes ago
+sql/dbObjectsDistr/it_checklimitreport.pkb
+        v_date_end := TO_DATE(v_json_obj.get_string(C_IN_END_DATE_TAG), C_IN_DATE_FORMAT);
+
+        IF v_date_begin > v_date_end THEN
+            v_errors_array.append(GetErrorObjAndLog(
+                    p_trace_id_input, C_ERR_01_CODE,
+                    UTL_LMS.FORMAT_MESSAGE(C_ERR_01_MSG,
+                                           TO_CHAR(v_date_begin, 'DD.MM.YYYY'), TO_CHAR(v_date_end, 'DD.MM.YYYY'))
+                                  ));
+            it_log.log('traceId=''' || p_trace_id_input ||
+                       ''' Invalid date range',
+                       it_log.C_MSG_TYPE__DEBUG);
+            RETURN BuildJsonOutput(p_errors_array => v_errors_array);
+        END IF;
+
+        -- 砥 㭨  㠫
+        IF v_report_name_list IS NULL OR v_report_name_list.get_size() = 0 THEN
+
+    Даниил Капустин
+    Даниил Капустин
+    @kapustin-dk · 13 minutes ago
+    Developer
+
+Что то не понял зачем нужна эта проверка. Мы же вроде не трогали переменную v_report_name_list после инициализации ? Или я не увидел где ?
+
+Даниил Капустин
+Даниил Капустин @kapustin-dk started a thread on the diff 13 minutes ago
+sql/dbObjectsDistr/it_checklimitreport.pkb
+
+        -- 砥 㭨  㠫
+        IF v_report_name_list IS NULL OR v_report_name_list.get_size() = 0 THEN
+            BEGIN
+                SELECT COALESCE(JSON_ARRAYAGG(T_FORM RETURNING CLOB), C_EMPTY_JSON_ARRAY)
+                INTO v_json_clob
+                FROM (SELECT DISTINCT T_FORM,
+                                      FIRST_VALUE(T_DESC) OVER (PARTITION BY T_FORM ORDER BY T_SINCEDATE DESC) AS T_DESC
+                      FROM DBDUI_REPORTCONTROLDATE_DBT
+                      WHERE T_SINCEDATE <= SYSDATE
+                      ORDER BY T_FORM);
+            EXCEPTION
+                WHEN OTHERS THEN
+                    it_log.log('traceId=''' || p_trace_id_input ||
+                               ''' Error fetching forms: ' || SQLERRM, it_log.C_MSG_TYPE__ERROR);
+                    v_json_clob := C_EMPTY_JSON_ARRAY;
+
+    Даниил Капустин
+    Даниил Капустин
+    @kapustin-dk · 13 minutes ago
+    Developer
+
+Так без этого же дальше ничего не заработает. Или я не понял что-то ? Может ошибку клиенту кинуть в этом случае ? Кейс редкий, но на случай косяка с заполнением таблицы - можно предусмотреть. Тем более под это уже есть задел.
+
+Даниил Капустин
+Даниил Капустин @kapustin-dk started a thread on the diff 13 minutes ago
+sql/dbObjectsDistr/it_checklimitreport.pkb
+
+    -- =============================================================================
+    -- ࠡ⪠ ⤥쭮 ⮣
+    -- =============================================================================
+    FUNCTION ControlDate_ProcessForm(
+        p_trace_id_input VARCHAR2,
+        p_form_name VARCHAR2,
+        p_date_begin DATE,
+        p_date_end DATE
+    ) RETURN CLOB
+        IS
+        PRAGMA AUTONOMOUS_TRANSACTION;
+        C_EMPTY_JSON_ARRAY CONSTANT CLOB         := TO_CLOB('[]');
+        C_PARSE_FORM_ERROR CONSTANT VARCHAR2(60) := '訡  ࠡ⪥  ''';
+        C_FORM_NOT_FOUND   CONSTANT VARCHAR2(60) := 'ERROR: ଠ    ࠢ筨   <=';
+        C_NO_ACTIVE_RECORD CONSTANT VARCHAR2(60) := ' SKIP: no active record for period starting ';
+
+    Даниил Капустин
+    Даниил Капустин
+    @kapustin-dk · 13 minutes ago
+    Developer
+
+А почему это на английском решил написать ? Может лучше все либо на русском, либо на английском ?
+
+Даниил Капустин
+Даниил Капустин @kapustin-dk started a thread on the diff 13 minutes ago
+sql/dbObjectsDistr/it_checklimitreport.pkb
+            WHERE ROWNUM = 1;
+        EXCEPTION
+            WHEN NO_DATA_FOUND THEN
+                it_log.log(
+                        v_log_prefix || C_FORM_NOT_FOUND ||
+                        TO_CHAR(p_date_end, 'YYYY-MM-DD'),
+                        it_log.C_MSG_TYPE__ERROR);
+                RAISE_APPLICATION_ERROR(-20001, 'ଠ ' || p_form_name || '    ࠢ筨');
+        END;
+
+        -- ⠭ 砫  樨  ᮬ
+        CASE v_kind
+            WHEN 12 THEN v_current_date := TRUNC(ADD_MONTHS(p_date_begin, -1), 'MM');
+            WHEN 4 THEN v_current_date := TRUNC(ADD_MONTHS(p_date_begin, -3), 'Q');
+            WHEN 1 THEN v_current_date := TRUNC(ADD_MONTHS(p_date_begin, -12), 'YYYY');
+            ELSE v_current_date := p_date_begin - 30;
+
+    Даниил Капустин
+    Даниил Капустин
+    @kapustin-dk · 13 minutes ago
+    Developer
+
+а это ты откуда взял ? Не вижу в постановке этого
+
+Даниил Капустин
+Даниил Капустин @kapustin-dk started a thread on the diff 13 minutes ago
+sql/dbObjectsDistr/it_checklimitreport.pkb
+                    CONTINUE;
+            END;
+
+            v_form_desc := v_control_date_rec.T_DESC;
+            ControlDate_ParseInterval(v_control_date_rec.T_INTERVAL, v_period_offset, v_period_unit);
+
+            -- ===  3: 뢠 ஫  ===
+            v_work_date := v_next_period_start;
+
+             -- ਬ塞 ᪫祭  筮 ᬥ饭
+            IF p_form_name = '0409708'
+                AND v_control_date_rec.T_KIND = 4
+                AND EXTRACT(MONTH FROM v_period_start) = 10 THEN
+                -- Q4 ? ᥣ 15 䥢ࠫ ᫥饣
+                v_work_date := ADD_MONTHS(TRUNC(v_period_start, 'YYYY'), 13) + 14;
+                it_log.log(v_log_prefix || ' SPECIAL RULE 0409708 (Q4): overridden work date to ' ||
+
+    Даниил Капустин
+    Даниил Капустин
+    @kapustin-dk · 13 minutes ago
+    Developer
+
+Я думаю лучше писать по русски "КОСТЫЛЬ ДЛЯ 0409708 ЧЕТВЕРТОГО КВАРТАЛА"
+
+Даниил Капустин
+Даниил Капустин @kapustin-dk started a thread on the diff 13 minutes ago
+sql/dbObjectsDistr/it_checklimitreport.pkb
+             -- ਬ塞 ᪫祭  筮 ᬥ饭
+            IF p_form_name = '0409708'
+                AND v_control_date_rec.T_KIND = 4
+                AND EXTRACT(MONTH FROM v_period_start) = 10 THEN
+                -- Q4 ? ᥣ 15 䥢ࠫ ᫥饣
+                v_work_date := ADD_MONTHS(TRUNC(v_period_start, 'YYYY'), 13) + 14;
+                it_log.log(v_log_prefix || ' SPECIAL RULE 0409708 (Q4): overridden work date to ' ||
+                           TO_CHAR(v_work_date, 'DD.MM.YYYY'), it_log.C_MSG_TYPE__DEBUG);
+            ELSE
+                -- 筠 : ਬ塞 ᬥ饭
+                IF v_period_unit = 'D' THEN
+                    v_work_date := RSI_RSBCALENDAR.GetDateAfterWorkDay(v_work_date, v_period_offset);
+                ELSIF v_period_unit = 'M' THEN
+                    v_work_date := ADD_MONTHS(v_work_date, v_period_offset);
+                ELSE
+                    v_work_date := v_work_date + v_period_offset;
+
+    Даниил Капустин
+    Даниил Капустин
+    @kapustin-dk · 13 minutes ago
+    Developer
+
+Не совсем понятно. Если не определен период - получается, мы добавим кол-во дней, причем без смещения для выходных. По моему лучше кинуть ошибку, разве нет ?
+
+Даниил Капустин
+Даниил Капустин @kapustin-dk started a thread on the diff 13 minutes ago
+sql/dbObjectsDistr/it_checklimitreport.pkb
+                                               'name' VALUE 'endDate',
+                                               'type' VALUE 'date',
+                                               'required' VALUE 'true' FORMAT JSON,
+                                               'column' VALUE 0,
+                                               'default' VALUE TO_CHAR(SYSDATE, 'YYYY-MM-DD')
+                                       ),
+                                       JSON_OBJECT(
+                                               'label' VALUE '᮪ ⮢',
+                                               'name' VALUE 'reportName',
+                                               'type' VALUE 'select',
+                                               'required' VALUE 'true' FORMAT JSON,
+                                               'column' VALUE 1,
+                                               'default' VALUE (SELECT JSON_ARRAYAGG(T_FORM RETURNING VARCHAR2(32767))
+                                                                FROM (SELECT DISTINCT T_FORM,
+                                                                                      FIRST_VALUE(T_DESC) OVER (PARTITION BY T_FORM ORDER BY T_SINCEDATE DESC) AS T_DESC
+                                                                      FROM DBDUI_REPORTCONTROLDATE_DBT
+
+    Даниил Капустин
+    Даниил Капустин
+    @kapustin-dk · 13 minutes ago
+    Developer
+
+Нужно опираться на dbdui_controldate_detail_dbt, смотри GetControlDateReportMetaUI
+
+Даниил Капустин
+Даниил Капустин @kapustin-dk started a thread on the diff 13 minutes ago
+sql/dbObjectsDistr/it_checklimitreport.pkb
+                WHERE T_FORM = p_form_name
+                  AND T_LIMITDATE = v_work_date;
+                IF v_exists = 0 THEN
+                    INSERT INTO DBDUI_REPORTPOSTINFO_DBT (T_FORM, T_LIMITDATE, T_SENDDAY, T_REGDATE, T_STATUS,
+                                                          T_MESSAGE,
+                                                          T_ADDTIME)
+                    VALUES (p_form_name, v_work_date, NULL, NULL, NULL, NULL, SYSTIMESTAMP);
+
+                END IF;
+                v_result_array.append(
+                        JSON_OBJECT_T(
+                                JSON_OBJECT(
+                                        'report_form' VALUE v_form_desc,
+                                        'lim_date' VALUE TO_CHAR(v_work_date, 'DD.MM.YYYY'),
+                                        'send_day' VALUE '',
+                                        'reg_day' VALUE '',
+
+    Даниил Капустин
+    Даниил Капустин
+    @kapustin-dk · 13 minutes ago
+    Developer
+
+Мне кажется, что для кейса, когда v_exists > 0 мы должны что-то сюда записывать, а не всегда оставлять пустоту. Но мы не выбираем данные из DBDUI_REPORTPOSTINFO_DBT, а только проверяем наличие. Кажется, упущен кусок логики
+
+Даниил Капустин
+Даниил Капустин @kapustin-dk started a thread on the diff 13 minutes ago
+sql/dbObjectsDistr/it_checklimitreport.pkb
+                        END LOOP;
+                END IF;
+            EXCEPTION
+                WHEN OTHERS THEN
+                    it_log.log('traceId=''' || p_trace_id_input ||
+                               ''' Error processing form ''' || v_form_name || ''': ' || SQLERRM,
+                               it_log.C_MSG_TYPE__ERROR);
+                    v_final_json.append(
+                            JSON_OBJECT_T(
+                                    JSON_OBJECT(
+                                            'report_form' VALUE v_form_name,
+                                            'lim_date' VALUE '',
+                                            'send_day' VALUE '',
+                                            'reg_day' VALUE '',
+                                            'status' VALUE '',
+                                            'mess' VALUE '訡 ࠡ⪨: ' || SQLERRM,
+
+    Даниил Капустин
+    Даниил Капустин
+    @kapustin-dk · 13 minutes ago
+    Developer
+
+Я думаю, что пользователям не очень интересны технические ошибки тут. У нас есть для этого отдельный функционал, лучше использовать его.
+
+Даниил Капустин
+Даниил Капустин @kapustin-dk started a thread on the diff 13 minutes ago
+sql/dbObjectsDistr/it_checklimitreport.pkb
+        p_json_input CLOB,
+        p_report_tag VARCHAR2,
+        p_tag_name VARCHAR2,
+        p_tag_value VARCHAR2
+    ) RETURN CLOB
+        IS
+        v_json_array JSON_ARRAY_T;
+        v_json_obj   JSON_OBJECT_T;
+        v_body_obj   JSON_OBJECT_T;
+        v_report_obj JSON_OBJECT_T;
+        v_result     CLOB;
+        v_log_prefix VARCHAR2(100) := 'ControlDateReport ControlDate_EnrichJson';
+    BEGIN
+
+        v_json_array := JSON_ARRAY_T.parse(p_json_input);
+        v_json_obj := JSON_OBJECT_T(v_json_array.get(0));
+
+    Даниил Капустин
+    Даниил Капустин
+    @kapustin-dk · 13 minutes ago
+    Developer
+
+Пересборка всего отчета ради добавления 2 полей (по одному за раз) выглядит сомнительно, но на твоем отчете не так критично. Но лучше добавить коммент чтоб потом сделать какое-то общее решение
