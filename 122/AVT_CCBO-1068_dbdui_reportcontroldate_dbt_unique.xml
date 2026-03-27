@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                      http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <!-- 1. Добавляем временную колонку TIMESTAMP WITH TIME ZONE -->
+    <changeSet id="126_2_alter_t_regdate_add_temp" author="borisov" dbms="oracle">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="dbdui_reportpostinfo_dbt"/>
+            <not>
+                <columnExists tableName="dbdui_reportpostinfo_dbt" columnName="T_REGDATE_TEMP"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="dbdui_reportpostinfo_dbt">
+            <column name="T_REGDATE_TEMP" type="TIMESTAMP WITH TIME ZONE" remarks="Временная колонка для миграции T_REGDATE в TIMESTAMP WITH TIME ZONE"/>
+        </addColumn>
+    </changeSet>
+
+    <!-- 2. Копируем данные из DATE в TIMESTAMP WITH TIME ZONE (с преобразованием) -->
+    <changeSet id="126_2_alter_t_regdate_copy_data" author="borisov" dbms="oracle">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="dbdui_reportpostinfo_dbt" columnName="T_REGDATE_TEMP"/>
+        </preConditions>
+        <sql>
+            UPDATE dbdui_reportpostinfo_dbt
+            SET T_REGDATE_TEMP = CAST(T_REGDATE AS TIMESTAMP WITH TIME ZONE)
+            WHERE T_REGDATE IS NOT NULL
+        </sql>
+    </changeSet>
+
+    <!-- 3. Удаляем оригинальную колонку T_REGDATE -->
+    <changeSet id="126_2_alter_t_regdate_drop_old" author="borisov" dbms="oracle">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="dbdui_reportpostinfo_dbt" columnName="T_REGDATE"/>
+        </preConditions>
+        <dropColumn tableName="dbdui_reportpostinfo_dbt" columnName="T_REGDATE"/>
+    </changeSet>
+
+    <!-- 4. Переименовываем временную колонку в T_REGDATE -->
+    <changeSet id="126_2_alter_t_regdate_rename" author="borisov" dbms="oracle">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="dbdui_reportpostinfo_dbt" columnName="T_REGDATE_TEMP"/>
+            <not>
+                <columnExists tableName="dbdui_reportpostinfo_dbt" columnName="T_REGDATE"/>
+            </not>
+        </preConditions>
+        <renameColumn
+                tableName="dbdui_reportpostinfo_dbt"
+                oldColumnName="T_REGDATE_TEMP"
+                newColumnName="T_REGDATE"
+                columnDataType="TIMESTAMP WITH TIME ZONE"/>
+    </changeSet>
+
+    <!-- 5. Создаём уникальный индекс для записей, добавленных ПОСЛЕ выполнения скрипта -->
+    <!-- Используем функциональный индекс с условием: только записи с T_ADDTIME > дата выполнения скрипта -->
+    <changeSet id="126_2_add_conditional_unique_index" author="borisov" dbms="oracle">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="dbdui_reportpostinfo_dbt"/>
+            <not>
+                <indexExists indexName="uk_reportpostinfo_conditional"/>
+            </not>
+        </preConditions>
+        <!-- Получаем текущую дату выполнения скрипта -->
+        <sql dbms="oracle" splitStatements="false">
+            DECLARE
+            v_execution_time TIMESTAMP := SYSTIMESTAMP;
+            BEGIN
+            -- Создаём функциональный уникальный индекс с условием
+            EXECUTE IMMEDIATE
+            'CREATE UNIQUE INDEX uk_reportpostinfo_conditional ON dbdui_reportpostinfo_dbt (' ||
+            '  CASE WHEN T_ADDTIME > :1 THEN T_FORM END, ' ||
+            '  CASE WHEN T_ADDTIME > :1 THEN T_LIMITDATE END, ' ||
+            '  CASE WHEN T_ADDTIME > :1 THEN T_REGDATE END, ' ||
+            '  CASE WHEN T_ADDTIME > :1 THEN T_STATUS END' ||
+            ')'
+            USING v_execution_time, v_execution_time, v_execution_time, v_execution_time;
+            END;
+        </sql>
+        <comment>
+            Уникальный индекс для записей, добавленных ПОСЛЕ выполнения этого скрипта.
+            Условие: T_ADDTIME > дата и время выполнения скрипта.
+            Индекс применяется только к записям, удовлетворяющим условию (через функциональный индекс с CASE).
+            Для старых записей (T_ADDTIME &lt;= дата выполнения) индекс не проверяется.
+        </comment>
+    </changeSet>
+
+</databaseChangeLog>
