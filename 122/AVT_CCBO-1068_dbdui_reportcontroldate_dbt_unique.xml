@@ -50,40 +50,41 @@
                 tableName="dbdui_reportpostinfo_dbt"
                 oldColumnName="T_REGDATE_TEMP"
                 newColumnName="T_REGDATE"
-                columnDataType="TIMESTAMP WITH TIME ZONE"/>
+
+        <!-- 5. Создаём условный уникальный индекс (БЕЗ переменных привязки) -->
+        <changeSet id="126_2_add_conditional_unique_index" author="borisov" dbms="oracle">
+            <preConditions onFail="MARK_RAN">
+                <tableExists tableName="dbdui_reportpostinfo_dbt"/>
+                <not>
+                    <indexExists indexName="uk_reportpostinfo_conditional"/>
+                </not>
+            </preConditions>
+            <sql dbms="oracle" splitStatements="false">
+                DECLARE
+                v_execution_time TIMESTAMP := SYSTIMESTAMP;
+                v_sql VARCHAR2(2000);
+                BEGIN
+                -- Формируем строку CREATE INDEX с подстановкой времени как литерала
+                v_sql := 'CREATE UNIQUE INDEX uk_reportpostinfo_conditional ON dbdui_reportpostinfo_dbt (' ||
+                '  CASE WHEN T_ADDTIME > TIMESTAMP ''' || TO_CHAR(v_execution_time, 'YYYY-MM-DD HH24:MI:SS.FF') || ''' THEN T_FORM END, ' ||
+                '  CASE WHEN T_ADDTIME > TIMESTAMP ''' || TO_CHAR(v_execution_time, 'YYYY-MM-DD HH24:MI:SS.FF') || ''' THEN T_LIMITDATE END, ' ||
+                '  CASE WHEN T_ADDTIME > TIMESTAMP ''' || TO_CHAR(v_execution_time, 'YYYY-MM-DD HH24:MI:SS.FF') || ''' THEN T_REGDATE END, ' ||
+                '  CASE WHEN T_ADDTIME > TIMESTAMP ''' || TO_CHAR(v_execution_time, 'YYYY-MM-DD HH24:MI:SS.FF') || ''' THEN T_STATUS END' ||
+                ')';
+                EXECUTE IMMEDIATE v_sql;
+                END;
+            </sql>
+            <rollback>
+                DROP INDEX uk_reportpostinfo_conditional;
+            </rollback>
+            <comment>
+                Уникальный индекс применяется ТОЛЬКО к записям, добавленным ПОСЛЕ выполнения этого скрипта.
+                Для старых записей (T_ADDTIME &lt;= время выполнения) все поля индекса = NULL → запись не участвует в проверке уникальности.
+                Время фиксируется в момент выполнения скрипта и подставляется как литерал TIMESTAMP.
+            </comment>
+        </changeSet>
+        columnDataType="TIMESTAMP WITH TIME ZONE"/>
     </changeSet>
 
-    <!-- 5. Создаём уникальный индекс для записей, добавленных ПОСЛЕ выполнения скрипта -->
-    <!-- Используем функциональный индекс с условием: только записи с T_ADDTIME > дата выполнения скрипта -->
-    <changeSet id="126_2_add_conditional_unique_index" author="borisov" dbms="oracle">
-        <preConditions onFail="MARK_RAN">
-            <tableExists tableName="dbdui_reportpostinfo_dbt"/>
-            <not>
-                <indexExists indexName="uk_reportpostinfo_conditional"/>
-            </not>
-        </preConditions>
-        <!-- Получаем текущую дату выполнения скрипта -->
-        <sql dbms="oracle" splitStatements="false">
-            DECLARE
-            v_execution_time TIMESTAMP := SYSTIMESTAMP;
-            BEGIN
-            -- Создаём функциональный уникальный индекс с условием
-            EXECUTE IMMEDIATE
-            'CREATE UNIQUE INDEX uk_reportpostinfo_conditional ON dbdui_reportpostinfo_dbt (' ||
-            '  CASE WHEN T_ADDTIME > :1 THEN T_FORM END, ' ||
-            '  CASE WHEN T_ADDTIME > :1 THEN T_LIMITDATE END, ' ||
-            '  CASE WHEN T_ADDTIME > :1 THEN T_REGDATE END, ' ||
-            '  CASE WHEN T_ADDTIME > :1 THEN T_STATUS END' ||
-            ')'
-            USING v_execution_time, v_execution_time, v_execution_time, v_execution_time;
-            END;
-        </sql>
-        <comment>
-            Уникальный индекс для записей, добавленных ПОСЛЕ выполнения этого скрипта.
-            Условие: T_ADDTIME > дата и время выполнения скрипта.
-            Индекс применяется только к записям, удовлетворяющим условию (через функциональный индекс с CASE).
-            Для старых записей (T_ADDTIME &lt;= дата выполнения) индекс не проверяется.
-        </comment>
-    </changeSet>
 
 </databaseChangeLog>
